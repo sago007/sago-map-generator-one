@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8.9)
+project (sago-map-generator-one)
+find_package(Boost COMPONENTS program_options REQUIRED)
+add_executable(sago-map-generator-one src/sago-map-generator-one.cpp)
+TARGET_LINK_LIBRARIES( sago-map-generator-one ${Boost_LIBRARIES} )

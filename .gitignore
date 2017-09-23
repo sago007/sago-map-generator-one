@@ -1,0 +1,11 @@
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+nbproject
+*~
+*.bak
+*.exe
+*.so
+*.dll
+Makefile
+sago-map-generator-one
