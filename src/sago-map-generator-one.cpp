@@ -28,7 +28,7 @@ struct Plane {
 	Point p1;
 	Point p2;
 	Point p3;
-	std::string texture = "NULL";
+	std::string texture = "NULL";  //texture may never be empty!
 	float x_off = 0.0;
 	float y_off = 0.0;
 	float rot_angle = 0.0;
@@ -82,6 +82,15 @@ static Brush createBrush(int x1, int y1, int z1, int x2, int y2, int z2) {
 	return ret;
 }
 
+static void brushAddTexture(Brush& b, const std::string& texture) {
+	if (texture.empty()) {
+		abort();
+	}
+	for (Plane& p : b.planes ) {
+		p.texture = texture;
+	}
+}
+
 static void writeBrush(std::ostream* output, int number, const Brush& b) {
 	*output << "// brush " << number << "\n"
 "{\n"
@@ -93,8 +102,8 @@ static void writeBrush(std::ostream* output, int number, const Brush& b) {
 "( 0 0 -144 ) ( 16 0 -144 ) ( 0 16 -144 ) e7/e7bricks01 0 0 0 0.5 0.5 0 0 0\n"
 "}\n";
 	*output << "{\n";
-	for (size_t i = 0; i< b.planes.size(); ++i) {
-		writePlane(output,b.planes.at(i));
+	for (const Plane& p : b.planes) {
+		writePlane(output,p);
 	}
 	*output << "}\n";
 }
@@ -106,6 +115,7 @@ static void writeMap(const theMap& m) {
 	*output << "\"classname\" \"worldspawn\"\n" <<
 		"\"message\" \""<< m.message<< "\"\n"; 	
 	Brush b = createBrush(10, 20, 30,100,80,10);
+	brushAddTexture(b, "e7/e7bricks01");
 	writeBrush(output,0,b);
 	*output << "}\n";
 }
