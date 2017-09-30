@@ -1,6 +1,7 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <vector>
+#include <random>
 
 #ifndef VERSIONNUMBER
 #define VERSIONNUMBER "0.1.0"
@@ -14,13 +15,14 @@ struct Config {
 	int numberOfLayers = 5;
 	int layerDistance = 32;
 	int platformThickness = 1;
-	int minX = -1000;
-	int maxX = 1000;
-	int minY = -1000;
-	int maxY = 1000;
+	int minX = -100;
+	int maxX = 100;
+	int minY = -100;
+	int maxY = 100;
+	std::string texture = "e7/e7bricks01";
 };
 
-Config config;
+static Config config;
 
 struct Point {
 	int x = 0;
@@ -128,6 +130,83 @@ static void writeMap(const theMap& m) {
 	*output << "}\n";
 }
 
+struct Platform {
+	int x;
+	int y;
+	int w;
+	int h;
+};
+
+struct Layer {
+	std::vector<Platform> platforms;
+};
+
+struct LayerMap {
+	std::vector<Layer> layers;
+};
+
+static bool intersect(const Platform& p1, const Platform& p2) {
+	bool intersecting = true;
+	if (p1.x > p2.x+p2.w) {
+		intersecting = false;
+	}
+	if (p1.x+p1.w < p2.x) {
+		intersecting = false;
+	}
+	if (p1.y > p2.y+p2.h) {
+		intersecting = false;
+	}
+	if (p1.y+p1.h < p2.y) {
+		intersecting = false;
+	}
+	return intersecting;
+}
+
+static bool intersecting(const Platform& p1, const std::vector<Platform> platforms) {
+	for (const auto& p2 : platforms) {
+		if (intersect(p1, p2)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static Layer layerCreate (const Config& c) {
+	Layer l;
+	for (int i=0; i < c.maxPerLayer; ++i) {
+		Platform p;
+		p.x = (rand()%(c.maxX-c.minX))+c.minX;
+		p.y = (rand()%(c.maxY-c.minY))+c.minY;
+		p.w = (rand()%(c.maxSize-c.minSize))+c.minSize;
+		p.h = (rand()%(c.maxSize-c.minSize))+c.minSize;
+		if (!intersecting(p, l.platforms)) {
+			l.platforms.push_back(p);
+		}
+	}
+	return l;
+}
+
+static LayerMap layerMapCreate (const Config& c) {
+	LayerMap m;
+	for (int i=0; i < c.numberOfLayers; ++i) {
+		Layer l = layerCreate(c);
+		m.layers.push_back(l);
+	}
+	return m;
+}
+
+static theMap LayerMapToMap(const Config& c, const LayerMap& m) {
+	theMap ret;
+	for (size_t i = 0; i < m.layers.size(); ++i) {
+		for (const Platform& p : m.layers.at(i).platforms) {
+			const int& u = c.unitSize;
+			Brush b = createBrush(u*p.x, u*p.y, u*i*(c.layerDistance),u*(p.x+p.w),u*(p.y+p.h),u*(i*(c.layerDistance)-c.platformThickness));
+			ret.brushes.push_back(b);
+		}
+	}
+	return ret;
+}
+
 int main(int argc, const char* argv[]) {
 	boost::program_options::options_description desc("Options");
 	desc.add_options()
@@ -151,9 +230,12 @@ int main(int argc, const char* argv[]) {
 		output_filename = vm["output"].as<std::string>();
 	}
 	theMap m;
+	
 	Brush b = createBrush(10, 20, 30,100,80,10);
 	brushAddTexture(b, "e7/e7bricks01");
 	m.brushes.push_back(b);
+	LayerMap m2 = layerMapCreate(config);
+	m = LayerMapToMap(config, m2);
 	writeMap(m);
 	return 0;
 }
