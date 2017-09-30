@@ -134,7 +134,7 @@ static void brushAddTexture(Brush& b, const std::string& texture) {
 	}
 }
 
-static void writeBrush(std::ostream* output, int number, const Brush& b) {
+static void writeBrush(std::ostream* output, const Brush& b) {
 	*output << "{\n";
 	for (const Plane& p : b.planes) {
 		writePlane(output,p);
@@ -148,7 +148,7 @@ static void writeMap(std::ostream* output, const theMap& m) {
 	*output << "\"classname\" \"worldspawn\"\n" <<
 		"\"message\" \""<< m.message<< "\"\n";
 	for (const Brush& b : m.brushes) {
-		writeBrush(output,0,b);
+		writeBrush(output,b);
 	}
 	*output << "}\n";
 }
@@ -254,6 +254,7 @@ int main(int argc, const char* argv[]) {
 	("minY", boost::program_options::value<int>(), "Min Y coordiante. Default: -100")
 	("maxY", boost::program_options::value<int>(), "Min Y coordiante. Default: 100")
 	("texture", boost::program_options::value<std::string>(), "The texture to use. Default: e7/e7bricks01")
+	("seed", boost::program_options::value<int>(), "Set the seed for the random generator. Must be an integer. This is implementation defined.")
 	;
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -282,6 +283,9 @@ int main(int argc, const char* argv[]) {
 	}
 	if (vm.count("texture")) {
 		config.texture = vm["texture"].as<std::string>();
+	}
+	if (vm.count("seed")) {
+		srand(vm["seed"].as<int>());
 	}
 	theMap m;
 	
