@@ -1,0 +1,12 @@
+sudo: required
+
+language: cpp
+
+services:
+  - docker
+
+
+script: ./extra/travis_build_script.sh
+
+notifications:
+  email: false

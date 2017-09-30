@@ -1,0 +1,12 @@
+FROM sago007/mxe_boost
+
+#RUN apt-get update && apt-get install -y build-essential mxe-i686-w64-mingw32.static-physfs cmake mxe-i686-w64-mingw32.static-glew \
+#mxe-i686-w64-mingw32.shared-qtbase mxe-i686-w64-mingw32.static-sfml
+
+RUN mkdir -p /staging/sago-map-generator-one
+
+COPY . /staging/sago-map-generator-one
+
+RUN cd /staging/sago-map-generator-one && \
+i686-w64-mingw32.static-cmake . && \
+make

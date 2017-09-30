@@ -1,0 +1,11 @@
+FROM ubuntu:14.04
+
+RUN apt-get update && apt-get install -y build-essential libboost-dev cmake libboost-program-options-dev
+
+RUN mkdir -p /staging/sago-map-generator-one
+
+COPY . /staging/sago-map-generator-one
+
+RUN cd /staging/sago-map-generator-one && \
+cmake . && \
+make
