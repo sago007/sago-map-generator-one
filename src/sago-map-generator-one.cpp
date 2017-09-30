@@ -25,6 +25,7 @@ https://github.com/sago007/sago-map-generator-one
 #include <boost/program_options.hpp>
 #include <vector>
 #include <random>
+#include <fstream>
 
 #ifndef VERSIONNUMBER
 #define VERSIONNUMBER "0.1.0"
@@ -141,8 +142,7 @@ static void writeBrush(std::ostream* output, int number, const Brush& b) {
 	*output << "}\n";
 }
 
-static void writeMap(const theMap& m) {
-	std::ostream* output = &std::cout;
+static void writeMap(std::ostream* output, const theMap& m) {
 	*output << "// entity 0\n";
 	*output << "{\n";
 	*output << "\"classname\" \"worldspawn\"\n" <<
@@ -231,16 +231,43 @@ static theMap LayerMapToMap(const Config& c, const LayerMap& m) {
 	return ret;
 }
 
+static void setIntIfSef(const boost::program_options::variables_map& vm, const char* name, int& value) {
+	if (vm.count(name)) {
+		value = vm[name].as<int>();
+	}
+}
+
 int main(int argc, const char* argv[]) {
 	boost::program_options::options_description desc("Options");
 	desc.add_options()
 	("version", "Print version information and quit")
 	("help,h", "Print basic usage information to stdout and quit")
 	("output,o", boost::program_options::value<std::string>(), "Output file")
+	("unitSize", boost::program_options::value<int>(), "Unit size. All other coordiantes are multiplied by this. Default: 16")
+	("minSize", boost::program_options::value<int>(), "Minimum platform size. Default: 20")
+	("maxSize", boost::program_options::value<int>(), "Max platform size. Default: 50")
+	("maxPerLayer", boost::program_options::value<int>(), "Max number of platforms per layer. Default: 10")
+	("numberOfLayers", boost::program_options::value<int>(), "Number of layers. Default: 5")
+	("platformThickness", boost::program_options::value<int>(), "How thick the platforms are. Default: 1")
+	("minX", boost::program_options::value<int>(), "Min X coordiante. Default: -100")
+	("maxX", boost::program_options::value<int>(), "Max X coordiante. Default: 100")
+	("minY", boost::program_options::value<int>(), "Min Y coordiante. Default: -100")
+	("maxY", boost::program_options::value<int>(), "Min Y coordiante. Default: 100")
+	("texture", boost::program_options::value<std::string>(), "The texture to use. Default: e7/e7bricks01")
 	;
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 	boost::program_options::notify(vm);
+	setIntIfSef(vm, "unitSize", config.unitSize);
+	setIntIfSef(vm, "minSize", config.minSize);
+	setIntIfSef(vm, "maxSize", config.maxSize);
+	setIntIfSef(vm, "maxPerLayer", config.maxPerLayer);
+	setIntIfSef(vm, "numberOfLayers", config.numberOfLayers);
+	setIntIfSef(vm, "platformThickness", config.platformThickness);
+	setIntIfSef(vm, "minX", config.minX);
+	setIntIfSef(vm, "maxX", config.maxX);
+	setIntIfSef(vm, "minY", config.minY);
+	setIntIfSef(vm, "maxY", config.maxY);
 	if (vm.count("help")) {
 		std::cout << desc << "\n";
 		return 0;
@@ -253,6 +280,9 @@ int main(int argc, const char* argv[]) {
 	if (vm.count("output")) {
 		output_filename = vm["output"].as<std::string>();
 	}
+	if (vm.count("texture")) {
+		config.texture = vm["texture"].as<std::string>();
+	}
 	theMap m;
 	
 	Brush b = createBrush(10, 20, 30,100,80,10);
@@ -260,6 +290,13 @@ int main(int argc, const char* argv[]) {
 	m.brushes.push_back(b);
 	LayerMap m2 = layerMapCreate(config);
 	m = LayerMapToMap(config, m2);
-	writeMap(m);
+	if (output_filename.length() > 0) {
+		std::ofstream f;
+		f.open(output_filename);
+		writeMap(&f, m);
+	}
+	else {
+		writeMap(&std::cout, m);
+	}
 	return 0;
 }
