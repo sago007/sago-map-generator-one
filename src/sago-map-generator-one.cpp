@@ -1,17 +1,86 @@
 #include <iostream>
 #include <boost/program_options.hpp>
+#include <vector>
 
 #ifndef VERSIONNUMBER
 #define VERSIONNUMBER "0.1.0"
 #endif
 
+struct Point {
+	int x = 0;
+	int y = 0;
+	int z = 0;
+	Point() {};
+	Point(int x, int y, int z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+	void SetPoint(int x, int y, int z) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+	}
+};
+
+struct Plane {
+	//Technically these are all floats but we do not want to generate floating numbers!
+	Point p1;
+	Point p2;
+	Point p3;
+	std::string texture = "NULL";
+	float x_off = 0.0;
+	float y_off = 0.0;
+	float rot_angle = 0.0;
+	float x_scale = 0.5;
+	float y_scale = 0.5;  
+};
+
 struct Brush {
 	int dummy=1;
+	std::vector<Plane> planes;
 };
 
 struct theMap {
 	std::string message = "Created by sago-map-generator-one";
 };
+
+static void writePlane(std::ostream* output, const Plane& p) {
+	*output << "( " << p.p1.x << " " << p.p1.y << " "  << p.p1.z << " ) ";
+	*output << "( " << p.p2.x << " "  << p.p2.y << " "  << p.p2.z << " ) ";
+	*output << "( " << p.p3.x << " "  << p.p3.y << " "  << p.p3.z << " ) ";
+	*output << p.texture << " " << p.x_off << " "  << p.y_off << " "  << p.rot_angle << " "  << p.x_scale << " "  << p.y_scale << " 0 0 0\n";
+}
+
+static Brush createBrush(int x1, int y1, int z1, int x2, int y2, int z2) {
+	Brush ret;
+	Plane p[6];
+	p[0].p1.SetPoint(x1, 0, 0);
+	p[0].p2.SetPoint(x1, 16, 0);
+	p[0].p3.SetPoint(x1, 0, 16);
+	
+	p[1].p1.SetPoint(x2, 0, 0);
+	p[1].p2.SetPoint(x2, 0, 16);
+	p[1].p3.SetPoint(x2, 16, 0);
+	
+	p[2].p1.SetPoint(0, y1, 0);
+	p[2].p2.SetPoint(0, y1, 16);
+	p[2].p3.SetPoint(16, y1, 0);
+	
+	p[3].p1.SetPoint(0, y2, 0);
+	p[3].p2.SetPoint(16, y2, 0);
+	p[3].p3.SetPoint(0, y2, 16);
+	
+	p[4].p1.SetPoint(0, 0, z1);
+	p[4].p2.SetPoint(0, 16, z1);
+	p[4].p3.SetPoint(16, 0, z1);
+	
+	p[5].p1.SetPoint(0, 0, z2);
+	p[5].p2.SetPoint(16, 0, z2);
+	p[5].p3.SetPoint(0, 16, z2);
+	ret.planes.assign(p,p+6);
+	return ret;
+}
 
 static void writeBrush(std::ostream* output, int number, const Brush& b) {
 	*output << "// brush " << number << "\n"
@@ -23,6 +92,11 @@ static void writeBrush(std::ostream* output, int number, const Brush& b) {
 "( 0 0 -128 ) ( 0 16 -128 ) ( 16 0 -128 ) e7/e7bricks01 48 0 0 0.5 0.5 0 0 0\n"
 "( 0 0 -144 ) ( 16 0 -144 ) ( 0 16 -144 ) e7/e7bricks01 0 0 0 0.5 0.5 0 0 0\n"
 "}\n";
+	*output << "{\n";
+	for (size_t i = 0; i< b.planes.size(); ++i) {
+		writePlane(output,b.planes.at(i));
+	}
+	*output << "}\n";
 }
 
 static void writeMap(const theMap& m) {
@@ -31,7 +105,7 @@ static void writeMap(const theMap& m) {
 	*output << "{\n";
 	*output << "\"classname\" \"worldspawn\"\n" <<
 		"\"message\" \""<< m.message<< "\"\n"; 	
-	Brush b;
+	Brush b = createBrush(10, 20, 30,100,80,10);
 	writeBrush(output,0,b);
 	*output << "}\n";
 }
