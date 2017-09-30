@@ -6,3 +6,23 @@ It requires a lot of work in NetRadiant afterwards if you actually want to play 
 It does open the possibility to have larger maps that are still interresting.
 
 The code is very rough. It is on the proof of concept phase and I needed the proof of concept fast.
+
+## Running
+
+Example 1:
+```
+./sago-map-generator-one --output sago-map-generated.map --numberOfLayers 10
+```
+
+For a full command list:
+```
+./sago-map-generator-one --help
+```
+
+
+## Compiling
+
+```
+cmake .
+make
+```
