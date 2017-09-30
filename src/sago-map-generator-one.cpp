@@ -6,6 +6,22 @@
 #define VERSIONNUMBER "0.1.0"
 #endif
 
+struct Config {
+	int unitSize = 16;  //All other sizes are multiplies of this
+	int minSize = 20;
+	int maxSize = 50;
+	int maxPerLayer = 10;
+	int numberOfLayers = 5;
+	int layerDistance = 32;
+	int platformThickness = 1;
+	int minX = -1000;
+	int maxX = 1000;
+	int minY = -1000;
+	int maxY = 1000;
+};
+
+Config config;
+
 struct Point {
 	int x = 0;
 	int y = 0;
@@ -43,6 +59,7 @@ struct Brush {
 
 struct theMap {
 	std::string message = "Created by sago-map-generator-one";
+	std::vector<Brush> brushes;
 };
 
 static void writePlane(std::ostream* output, const Plane& p) {
@@ -92,15 +109,6 @@ static void brushAddTexture(Brush& b, const std::string& texture) {
 }
 
 static void writeBrush(std::ostream* output, int number, const Brush& b) {
-	*output << "// brush " << number << "\n"
-"{\n"
-"( -192 0 0 ) ( -192 16 0 ) ( -192 0 16 ) e7/e7bricks01 32 96 0 0.5 0.5 0 0 0\n"
-"( 448 0 0 ) ( 448 0 16 ) ( 448 16 0 ) e7/e7bricks01 16 96 0 0.5 0.5 0 0 0\n"
-"( 0 -64 0 ) ( 0 -64 16 ) ( 16 -64 0 ) e7/e7bricks01 16 96 0 0.5 0.5 0 0 0\n"
-"( 0 64 0 ) ( 16 64 0 ) ( 0 64 16 ) e7/e7bricks01 64 96 0 0.5 0.5 0 0 0\n"
-"( 0 0 -128 ) ( 0 16 -128 ) ( 16 0 -128 ) e7/e7bricks01 48 0 0 0.5 0.5 0 0 0\n"
-"( 0 0 -144 ) ( 16 0 -144 ) ( 0 16 -144 ) e7/e7bricks01 0 0 0 0.5 0.5 0 0 0\n"
-"}\n";
 	*output << "{\n";
 	for (const Plane& p : b.planes) {
 		writePlane(output,p);
@@ -113,10 +121,10 @@ static void writeMap(const theMap& m) {
 	*output << "// entity 0\n";
 	*output << "{\n";
 	*output << "\"classname\" \"worldspawn\"\n" <<
-		"\"message\" \""<< m.message<< "\"\n"; 	
-	Brush b = createBrush(10, 20, 30,100,80,10);
-	brushAddTexture(b, "e7/e7bricks01");
-	writeBrush(output,0,b);
+		"\"message\" \""<< m.message<< "\"\n";
+	for (const Brush& b : m.brushes) {
+		writeBrush(output,0,b);
+	}
 	*output << "}\n";
 }
 
@@ -143,6 +151,9 @@ int main(int argc, const char* argv[]) {
 		output_filename = vm["output"].as<std::string>();
 	}
 	theMap m;
+	Brush b = createBrush(10, 20, 30,100,80,10);
+	brushAddTexture(b, "e7/e7bricks01");
+	m.brushes.push_back(b);
 	writeMap(m);
 	return 0;
 }
