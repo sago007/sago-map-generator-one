@@ -95,34 +95,69 @@ static void writePlane(std::ostream* output, const Plane& p) {
 	*output << p.texture << " " << p.x_off << " "  << p.y_off << " "  << p.rot_angle << " "  << p.x_scale << " "  << p.y_scale << " 0 0 0\n";
 }
 
-static Brush createBrush(int x1, int y1, int z1, int x2, int y2, int z2) {
+
+/**
+ * Creates a brush from 9 Points. The first 4 points are the top surface clockwise. The remaining 4 are the bottom surface counter-clockwise(from the top).
+ * point 5 is below point 4
+ * @param p1
+ * @param p2
+ * @param p3
+ * @param p4
+ * @param p5
+ * @param p6
+ * @param p7
+ * @param p8
+ * @return 
+ */
+static Brush createBrush(const Point& p1, const Point& p2, const Point& p3, const Point& p4, const Point& p5, const Point& p6, const Point& p7, const Point& p8) {
 	Brush ret;
 	Plane p[6];
-	p[0].p1.SetPoint(x1, 0, 0);
-	p[0].p2.SetPoint(x1, 16, 0);
-	p[0].p3.SetPoint(x1, 0, 16);
+	p[0].p1 = p1;
+	p[0].p2 = p2;
+	p[0].p3 = p3;
 	
-	p[1].p1.SetPoint(x2, 0, 0);
-	p[1].p2.SetPoint(x2, 0, 16);
-	p[1].p3.SetPoint(x2, 16, 0);
+	p[1].p1 = p4;
+	p[1].p2 = p3;
+	p[1].p3 = p6;
 	
-	p[2].p1.SetPoint(0, y1, 0);
-	p[2].p2.SetPoint(0, y1, 16);
-	p[2].p3.SetPoint(16, y1, 0);
+	p[2].p1 = p3;
+	p[2].p2 = p2;
+	p[2].p3 = p7;
 	
-	p[3].p1.SetPoint(0, y2, 0);
-	p[3].p2.SetPoint(16, y2, 0);
-	p[3].p3.SetPoint(0, y2, 16);
+	p[3].p1 = p2;
+	p[3].p2 = p1;
+	p[3].p3 = p8;
 	
-	p[4].p1.SetPoint(0, 0, z1);
-	p[4].p2.SetPoint(0, 16, z1);
-	p[4].p3.SetPoint(16, 0, z1);
+	p[4].p1 = p1;
+	p[4].p2 = p4;
+	p[4].p3 = p5;
 	
-	p[5].p1.SetPoint(0, 0, z2);
-	p[5].p2.SetPoint(16, 0, z2);
-	p[5].p3.SetPoint(0, 16, z2);
+	p[5].p1 = p5;
+	p[5].p2 = p6;
+	p[5].p3 = p7;
 	ret.planes.assign(p,p+6);
-	return ret;
+	return ret;	
+}
+
+/*
+ * 
+ * The coordiantes expects this system:
+        ^ z+
+        |
+        |
+        |
+        |
+        |------------> y+
+       /
+      /
+     /
+    /
+   <
+ x+
+		*/
+
+static Brush createBrush(int x1, int y1, int z1, int x2, int y2, int z2) {
+	return createBrush({x2,y1,z1},{x1,y1,z1},{x1,y2,z1},{x2,y2,z1},{x2,y2,z2},{x1,y2,z2},{x1,y1,z2},{x2,y1,z2});
 }
 
 static void brushAddTexture(Brush& b, const std::string& texture) {
