@@ -75,7 +75,7 @@ struct Plane {
 	float y_off = 0.0;
 	float rot_angle = 0.0;
 	float x_scale = 0.5;
-	float y_scale = 0.5;  
+	float y_scale = 0.5;
 };
 
 struct Brush {
@@ -266,7 +266,7 @@ static theMap LayerMapToMap(const Config& c, const LayerMap& m) {
 	return ret;
 }
 
-static void setIntIfSef(const boost::program_options::variables_map& vm, const char* name, int& value) {
+static void setIntIfSet(const boost::program_options::variables_map& vm, const char* name, int& value) {
 	if (vm.count(name)) {
 		value = vm[name].as<int>();
 	}
@@ -294,16 +294,16 @@ int main(int argc, const char* argv[]) {
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 	boost::program_options::notify(vm);
-	setIntIfSef(vm, "unitSize", config.unitSize);
-	setIntIfSef(vm, "minSize", config.minSize);
-	setIntIfSef(vm, "maxSize", config.maxSize);
-	setIntIfSef(vm, "maxPerLayer", config.maxPerLayer);
-	setIntIfSef(vm, "numberOfLayers", config.numberOfLayers);
-	setIntIfSef(vm, "platformThickness", config.platformThickness);
-	setIntIfSef(vm, "minX", config.minX);
-	setIntIfSef(vm, "maxX", config.maxX);
-	setIntIfSef(vm, "minY", config.minY);
-	setIntIfSef(vm, "maxY", config.maxY);
+	setIntIfSet(vm, "unitSize", config.unitSize);
+	setIntIfSet(vm, "minSize", config.minSize);
+	setIntIfSet(vm, "maxSize", config.maxSize);
+	setIntIfSet(vm, "maxPerLayer", config.maxPerLayer);
+	setIntIfSet(vm, "numberOfLayers", config.numberOfLayers);
+	setIntIfSet(vm, "platformThickness", config.platformThickness);
+	setIntIfSet(vm, "minX", config.minX);
+	setIntIfSet(vm, "maxX", config.maxX);
+	setIntIfSet(vm, "minY", config.minY);
+	setIntIfSet(vm, "maxY", config.maxY);
 	if (vm.count("help")) {
 		std::cout << desc << "\n";
 		return 0;
