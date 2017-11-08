@@ -266,6 +266,13 @@ static theMap LayerMapToMap(const Config& c, const LayerMap& m) {
 	return ret;
 }
 
+static void AddHollowBox(const Config& c, theMap& m) {
+	const int& u = c.unitSize;
+	Brush floor = createBrush(u*c.minX, u*c.minY, -u*c.layerDistance, u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize), u*(-c.layerDistance-c.platformThickness));
+	brushAddTexture(floor, c.texture);
+	m.brushes.push_back(floor);
+}
+
 static void setIntIfSet(const boost::program_options::variables_map& vm, const char* name, int& value) {
 	if (vm.count(name)) {
 		value = vm[name].as<int>();
@@ -329,6 +336,7 @@ int main(int argc, const char* argv[]) {
 	m.brushes.push_back(b);
 	LayerMap m2 = layerMapCreate(config);
 	m = LayerMapToMap(config, m2);
+	AddHollowBox(config, m);
 	if (output_filename.length() > 0) {
 		std::ofstream f;
 		f.open(output_filename);
