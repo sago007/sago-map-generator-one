@@ -157,6 +157,7 @@ static Brush createBrush(const Point& p1, const Point& p2, const Point& p3, cons
 		*/
 
 static Brush createBrush(int x1, int y1, int z1, int x2, int y2, int z2) {
+	//std::cout << x1 << " " << y1 << " " << z1 << " " << x2 << " " << y2 << " " << z2 << "\n";
 	return createBrush({x2,y1,z1},{x1,y1,z1},{x1,y2,z1},{x2,y2,z1},{x2,y2,z2},{x1,y2,z2},{x1,y1,z2},{x2,y1,z2});
 }
 
@@ -274,6 +275,20 @@ static void AddHollowBox(const Config& c, theMap& m) {
 	Brush top = createBrush(u*c.minX, u*c.minY, u*((c.numberOfLayers+2)*c.layerDistance), u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize), u*((c.numberOfLayers+2)*c.layerDistance-c.platformThickness));
 	brushAddTexture(top, c.texture);
 	m.brushes.push_back(top);
+	int topButtom = u*((c.numberOfLayers+2)*c.layerDistance-c.platformThickness);
+	int floorTop = -u*c.layerDistance;
+	Brush side = createBrush(u*c.minX-1, u*c.minY, topButtom, u*c.minX, u*(c.maxY+c.maxSize), floorTop);
+	brushAddTexture(side, c.texture);
+	m.brushes.push_back(side);
+	side = createBrush(u*(c.maxX+c.maxSize), u*c.minY, topButtom, u*(c.maxX+c.maxSize+1), u*(c.maxY+c.maxSize), floorTop);
+	brushAddTexture(side, c.texture);
+	m.brushes.push_back(side);
+	side = createBrush(u*(c.minX), u*c.minY-1, topButtom, u*(c.maxX+c.maxSize), u*(c.minY), floorTop);
+	brushAddTexture(side, c.texture);
+	m.brushes.push_back(side);
+	side = createBrush(u*(c.minX), u*(c.maxY+c.maxSize), topButtom, u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize+1), floorTop);
+	brushAddTexture(side, c.texture);
+	m.brushes.push_back(side);
 }
 
 static void setIntIfSet(const boost::program_options::variables_map& vm, const char* name, int& value) {
