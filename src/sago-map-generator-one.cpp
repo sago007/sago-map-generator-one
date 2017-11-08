@@ -271,6 +271,9 @@ static void AddHollowBox(const Config& c, theMap& m) {
 	Brush floor = createBrush(u*c.minX, u*c.minY, -u*c.layerDistance, u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize), u*(-c.layerDistance-c.platformThickness));
 	brushAddTexture(floor, c.texture);
 	m.brushes.push_back(floor);
+	Brush top = createBrush(u*c.minX, u*c.minY, u*((c.numberOfLayers+2)*c.layerDistance), u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize), u*((c.numberOfLayers+2)*c.layerDistance-c.platformThickness));
+	brushAddTexture(top, c.texture);
+	m.brushes.push_back(top);
 }
 
 static void setIntIfSet(const boost::program_options::variables_map& vm, const char* name, int& value) {
