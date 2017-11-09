@@ -83,6 +83,11 @@ struct Brush {
 	std::vector<Plane> planes;
 };
 
+struct Entity {
+	std::string classname;
+	Point origin;
+};
+
 struct theMap {
 	std::string message = "Created by sago-map-generator-one";
 	std::vector<Brush> brushes;
@@ -97,7 +102,7 @@ static void writePlane(std::ostream* output, const Plane& p) {
 
 
 /**
- * Creates a brush from 9 Points. The first 4 points are the top surface clockwise. The remaining 4 are the bottom surface counter-clockwise(from the top).
+ * Creates a brush from 8 Points. The first 4 points are the top surface clockwise. The remaining 4 are the bottom surface counter-clockwise(from the top).
  * point 5 is below point 4
  * @param p1
  * @param p2
@@ -107,7 +112,7 @@ static void writePlane(std::ostream* output, const Plane& p) {
  * @param p6
  * @param p7
  * @param p8
- * @return 
+ * @return the resulting brush
  */
 static Brush createBrush(const Point& p1, const Point& p2, const Point& p3, const Point& p4, const Point& p5, const Point& p6, const Point& p7, const Point& p8) {
 	Brush ret;
