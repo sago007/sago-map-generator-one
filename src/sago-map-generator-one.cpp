@@ -44,6 +44,7 @@ struct Config {
 	int minY = -100;
 	int maxY = 100;
 	std::string texture = "e7/e7bricks01";
+	std::string skyboxTexture= "skies/earthsky01";
 };
 
 static Config config;
@@ -84,13 +85,15 @@ struct Brush {
 };
 
 struct Entity {
-	std::string classname;
+	bool isSet = false;
+	std::string classname = "";
 	Point origin;
 };
 
 struct theMap {
 	std::string message = "Created by sago-map-generator-one";
 	std::vector<Brush> brushes;
+	std::vector<Entity> entities;
 };
 
 static void writePlane(std::ostream* output, const Plane& p) {
@@ -183,15 +186,27 @@ static void writeBrush(std::ostream* output, const Brush& b) {
 	*output << "}\n";
 }
 
+static void writeEntity(std::ostream* output, const Entity& e) {
+	*output << "{\n";
+	*output << "\"classname\" \"" << e.classname << "\"\n";
+	*output << "\"origin\" \"" << e.origin.x << " " << e.origin.y << " " << e.origin.z << "\"\n";
+	*output << "}\n";
+}
+
 static void writeMap(std::ostream* output, const theMap& m) {
 	*output << "// entity 0\n";
 	*output << "{\n";
 	*output << "\"classname\" \"worldspawn\"\n" <<
 		"\"message\" \""<< m.message<< "\"\n";
 	for (const Brush& b : m.brushes) {
-		writeBrush(output,b);
+		writeBrush(output, b);
 	}
 	*output << "}\n";
+	for (const Entity& e : m.entities) {
+		if (e.isSet) {
+			writeEntity(output, e);
+		}
+	}
 }
 
 struct Platform {
@@ -267,6 +282,11 @@ static theMap LayerMapToMap(const Config& c, const LayerMap& m) {
 			Brush b = createBrush(u*p.x, u*p.y, u*i*(c.layerDistance),u*(p.x+p.w),u*(p.y+p.h),u*(i*(c.layerDistance)-c.platformThickness));
 			brushAddTexture(b, c.texture);
 			ret.brushes.push_back(b);
+			Entity e;
+			e.origin.x = u*(p.x+p.w/2);
+			e.origin.y = u*(p.y+p.h/2);
+			e.origin.z = u*(i*(c.layerDistance))+64;
+			ret.entities.push_back(e);
 		}
 	}
 	return ret;
@@ -275,24 +295,24 @@ static theMap LayerMapToMap(const Config& c, const LayerMap& m) {
 static void AddHollowBox(const Config& c, theMap& m) {
 	const int& u = c.unitSize;
 	Brush floor = createBrush(u*c.minX, u*c.minY, -u*c.layerDistance, u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize), u*(-c.layerDistance-c.platformThickness));
-	brushAddTexture(floor, c.texture);
+	brushAddTexture(floor, c.skyboxTexture);
 	m.brushes.push_back(floor);
 	Brush top = createBrush(u*c.minX, u*c.minY, u*((c.numberOfLayers+2)*c.layerDistance), u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize), u*((c.numberOfLayers+2)*c.layerDistance-c.platformThickness));
-	brushAddTexture(top, c.texture);
+	brushAddTexture(top, c.skyboxTexture);
 	m.brushes.push_back(top);
 	int topButtom = u*((c.numberOfLayers+2)*c.layerDistance-c.platformThickness);
 	int floorTop = -u*c.layerDistance;
 	Brush side = createBrush(u*c.minX-1, u*c.minY, topButtom, u*c.minX, u*(c.maxY+c.maxSize), floorTop);
-	brushAddTexture(side, c.texture);
+	brushAddTexture(side, c.skyboxTexture);
 	m.brushes.push_back(side);
 	side = createBrush(u*(c.maxX+c.maxSize), u*c.minY, topButtom, u*(c.maxX+c.maxSize+1), u*(c.maxY+c.maxSize), floorTop);
-	brushAddTexture(side, c.texture);
+	brushAddTexture(side, c.skyboxTexture);
 	m.brushes.push_back(side);
 	side = createBrush(u*(c.minX), u*c.minY-1, topButtom, u*(c.maxX+c.maxSize), u*(c.minY), floorTop);
-	brushAddTexture(side, c.texture);
+	brushAddTexture(side, c.skyboxTexture);
 	m.brushes.push_back(side);
 	side = createBrush(u*(c.minX), u*(c.maxY+c.maxSize), topButtom, u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize+1), floorTop);
-	brushAddTexture(side, c.texture);
+	brushAddTexture(side, c.skyboxTexture);
 	m.brushes.push_back(side);
 }
 
@@ -353,12 +373,15 @@ int main(int argc, const char* argv[]) {
 		srand(vm["seed"].as<int>());
 	}
 	theMap m;
-	
 	Brush b = createBrush(10, 20, 30,100,80,10);
 	brushAddTexture(b, "e7/e7bricks01");
 	m.brushes.push_back(b);
 	LayerMap m2 = layerMapCreate(config);
 	m = LayerMapToMap(config, m2);
+	for (Entity&e : m.entities) {
+		e.classname = "info_player_start";
+		e.isSet = true;
+	}
 	AddHollowBox(config, m);
 	if (output_filename.length() > 0) {
 		std::ofstream f;
