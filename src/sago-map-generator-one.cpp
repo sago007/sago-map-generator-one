@@ -406,8 +406,12 @@ int main(int argc, const char* argv[]) {
 	m.brushes.push_back(b);
 	LayerMap m2 = layerMapCreate(config);
 	m = LayerMapToMap(config, m2);
-	for (Entity&e : m.entities) {
+	for (size_t i=0; i< m.entities.size(); ++i) {
+		Entity& e = m.entities.at(i);
 		e.classname = "info_player_start";
+		if (i%2==1) {
+			e.classname = "weapon_rocketlauncher";
+		}
 		e.isSet = true;
 	}
 	AddHollowBox(config, m);
