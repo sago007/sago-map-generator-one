@@ -334,7 +334,7 @@ static void AddHollowBox(const Config& c, theMap& m) {
 	trigger_hurt.dmg = 1000;
 	trigger_hurt.isSet = true;
 	for (Plane& p : special.planes) {
-		p.texture = "common/dodraw";
+		p.texture = "common/nodraw";
 	}
 	trigger_hurt.brushes.push_back(special);
 	m.entities.push_back(trigger_hurt);
