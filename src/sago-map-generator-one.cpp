@@ -339,6 +339,7 @@ int main(int argc, const char* argv[]) {
 	("minY", boost::program_options::value<int>(), "Min Y coordiante. Default: -100")
 	("maxY", boost::program_options::value<int>(), "Min Y coordiante. Default: 100")
 	("texture", boost::program_options::value<std::string>(), "The texture to use. Default: e7/e7bricks01")
+	("skyboxTexture", boost::program_options::value<std::string>(), "The texture to use. Default: skies/earthsky01")
 	("seed", boost::program_options::value<int>(), "Set the seed for the random generator. Must be an integer. This is implementation defined.")
 	;
 	boost::program_options::variables_map vm;
@@ -368,6 +369,9 @@ int main(int argc, const char* argv[]) {
 	}
 	if (vm.count("texture")) {
 		config.texture = vm["texture"].as<std::string>();
+	}
+	if (vm.count("skyboxTexture")) {
+		config.skyboxTexture = vm["skyboxTexture"].as<std::string>();
 	}
 	if (vm.count("seed")) {
 		srand(vm["seed"].as<int>());
