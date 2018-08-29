@@ -88,6 +88,8 @@ struct Entity {
 	bool isSet = false;
 	std::string classname = "";
 	Point origin;
+	int dmg = 0;
+	std::vector<Brush> brushes;
 };
 
 struct theMap {
@@ -144,11 +146,11 @@ static Brush createBrush(const Point& p1, const Point& p2, const Point& p3, cons
 	p[5].p2 = p6;
 	p[5].p3 = p7;
 	ret.planes.assign(p,p+6);
-	return ret;	
+	return ret;
 }
 
 /*
- * 
+ *
  * The coordiantes expects this system:
         ^ z+
         |
@@ -189,7 +191,16 @@ static void writeBrush(std::ostream* output, const Brush& b) {
 static void writeEntity(std::ostream* output, const Entity& e) {
 	*output << "{\n";
 	*output << "\"classname\" \"" << e.classname << "\"\n";
-	*output << "\"origin\" \"" << e.origin.x << " " << e.origin.y << " " << e.origin.z << "\"\n";
+	if (e.dmg) {
+		*output << "\"dmg\" \"" << e.dmg << "\"\n";
+	}
+	if (e.brushes.size()) {
+		for (const Brush& b : e.brushes) {
+			writeBrush(output, b);
+		}
+	} else {
+		*output << "\"origin\" \"" << e.origin.x << " " << e.origin.y << " " << e.origin.z << "\"\n";
+	}
 	*output << "}\n";
 }
 
@@ -314,6 +325,19 @@ static void AddHollowBox(const Config& c, theMap& m) {
 	side = createBrush(u*(c.minX), u*(c.maxY+c.maxSize), topButtom, u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize+1), floorTop);
 	brushAddTexture(side, c.skyboxTexture);
 	m.brushes.push_back(side);
+	//Special ones:
+	Brush special = createBrush(u*c.minX, u*c.minY, -u*c.layerDistance+64, u*(c.maxX+c.maxSize), u*(c.maxY+c.maxSize), u*(-c.layerDistance));
+	brushAddTexture(special, "common/nodrop");
+	m.brushes.push_back(special);
+	Entity trigger_hurt;
+	trigger_hurt.classname = "trigger_hurt";
+	trigger_hurt.dmg = 1000;
+	trigger_hurt.isSet = true;
+	for (Plane& p : special.planes) {
+		p.texture = "common/dodraw";
+	}
+	trigger_hurt.brushes.push_back(special);
+	m.entities.push_back(trigger_hurt);
 }
 
 static void setIntIfSet(const boost::program_options::variables_map& vm, const char* name, int& value) {
